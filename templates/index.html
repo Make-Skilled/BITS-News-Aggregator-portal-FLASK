@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiNews Hub - Your Ultimate News Aggregator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 fixed w-full shadow-lg z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold">MultiNews Hub</a>
+            <ul class="hidden md:flex space-x-6">
+                <li><a href="#" class="hover:text-gray-300">Home</a></li>
+                <li><a href="#features" class="hover:text-gray-300">Features</a></li>
+                <li><a href="#about" class="hover:text-gray-300">About</a></li>
+                <li><a href="#reviews" class="hover:text-gray-300">Reviews</a></li>
+                <li><a href="#contact" class="hover:text-gray-300">Contact</a></li>
+                <li><a href="/login" class="hover:text-gray-300">Login</a></li>
+            </ul>
+            <button class="md:hidden text-white text-2xl"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="h-screen flex items-center justify-center text-center bg-cover bg-center" style="background-image: url('https://source.unsplash.com/1600x900/?news');">
+        <div class="bg-black bg-opacity-50 p-10 rounded-lg">
+            <h1 class="text-4xl md:text-6xl font-bold text-white">Stay Informed, Stay Ahead</h1>
+            <p class="text-lg text-gray-200 mt-4">Get the latest news from top sources like The Hindu, India Times, Indian Express & more!</p>
+            <a href="#" class="mt-6 inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700">Explore News</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 bg-gray-100 text-center">
+        <h2 class="text-4xl font-bold">Features</h2>
+        <div class="mt-6 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="p-6 bg-white shadow-lg rounded-lg hover:shadow-xl transition">
+                <i class="fas fa-newspaper text-4xl text-blue-500"></i>
+                <h3 class="text-xl font-semibold mt-4">Latest News</h3>
+                <p class="mt-2 text-gray-600">Stay updated with real-time news from multiple sources.</p>
+            </div>
+            <div class="p-6 bg-white shadow-lg rounded-lg hover:shadow-xl transition">
+                <i class="fas fa-robot text-4xl text-blue-500"></i>
+                <h3 class="text-xl font-semibold mt-4">AI Assistant</h3>
+                <p class="mt-2 text-gray-600">Ask AI to summarize articles and give insights.</p>
+            </div>
+            <div class="p-6 bg-white shadow-lg rounded-lg hover:shadow-xl transition">
+                <i class="fas fa-search text-4xl text-blue-500"></i>
+                <h3 class="text-xl font-semibold mt-4">Smart Search</h3>
+                <p class="mt-2 text-gray-600">Find articles quickly with intelligent search.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 bg-blue-600 text-white text-center">
+        <h2 class="text-4xl font-bold">About MultiNews Hub</h2>
+        <p class="mt-6 max-w-4xl mx-auto text-lg">MultiNews Hub is a centralized news aggregator that collects and displays news from the most trusted sources, ensuring you stay updated on global and local happenings in real time.</p>
+    </section>
+
+    <!-- Reviews Section -->
+    <section id="reviews" class="py-16 bg-gray-100 text-center">
+        <h2 class="text-4xl font-bold">What Our Users Say</h2>
+        <div class="mt-6 grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <p class="italic text-gray-600">"The best way to stay updated with the latest news. Highly recommended!"</p>
+                <h3 class="mt-4 font-semibold">- Rahul S.</h3>
+            </div>
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <p class="italic text-gray-600">"A powerful news aggregator with an AI assistant. Amazing experience!"</p>
+                <h3 class="mt-4 font-semibold">- Priya M.</h3>
+            </div>
+            <div class="p-6 bg-white shadow-lg rounded-lg">
+                <p class="italic text-gray-600">"I love how easy it is to browse multiple sources in one place!"</p>
+                <h3 class="mt-4 font-semibold">- Arjun T.</h3>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-16 bg-blue-600 text-white text-center">
+        <h2 class="text-4xl font-bold">Contact Us</h2>
+        <form class="mt-6 max-w-lg mx-auto">
+            <input type="text" placeholder="Your Name" class="w-full p-3 rounded-lg text-black">
+            <input type="email" placeholder="Your Email" class="w-full p-3 mt-4 rounded-lg text-black">
+            <textarea placeholder="Your Message" class="w-full p-3 mt-4 rounded-lg text-black"></textarea>
+            <button class="mt-6 bg-white text-blue-600 px-6 py-3 rounded-lg hover:bg-gray-200">Send Message</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 text-center py-6">
+        <p>&copy; 2025 MultiNews Hub. All rights reserved.</p>
+        <div class="flex justify-center space-x-4 mt-2">
+            <a href="#"><i class="fab fa-facebook text-xl hover:text-white"></i></a>
+            <a href="#"><i class="fab fa-twitter text-xl hover:text-white"></i></a>
+            <a href="#"><i class="fab fa-linkedin text-xl hover:text-white"></i></a>
+        </div>
+    </footer>
+
+</body>
+</html>
