@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-2xl font-bold flex items-center">
+                <i data-lucide="newspaper" class="w-6 h-6 mr-2"></i> MultiNews Hub
+            </a>
+            <a href="/news"
+                class="bg-white text-blue-600 px-4 py-2 rounded-lg flex items-center hover:bg-gray-200 transition duration-300">
+                <i data-lucide="arrow-left" class="w-5 h-5 mr-1"></i> Back
+            </a>
+        </div>
+    </nav>
+
+    <!-- Article Container -->
+    <div id="articleContainer"
+        class="container mx-auto max-w-3xl bg-white shadow-lg rounded-lg p-6 mt-6 opacity-0 transform scale-95 transition-all duration-500">
+        <!-- Article details will be inserted dynamically -->
+    </div>
+
+    <!-- Modal for Summary -->
+    <div id="summaryModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+            <h2 class="text-xl font-bold text-gray-800">AI Summary</h2>
+            <p id="summaryText" class="text-gray-700 mt-4">Loading...</p>
+
+            <div class="flex gap-4 mt-4">
+                <button onclick="readSummary()"
+                    class="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition duration-300 w-1/2">
+                    <i data-lucide="volume-2" class="w-5 h-5"></i> Read Out
+                </button>
+                <button onclick="closeModal()"
+                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300 w-1/2">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const newsData = sessionStorage.getItem('newsData');
+            const selectedIndex = sessionStorage.getItem('selectedArticleIndex');
+
+            if (!newsData || selectedIndex === null) {
+                document.body.innerHTML = "<h1 class='text-center text-red-600 mt-10 text-2xl'>No article data available.</h1>";
+                return;
+            }
+
+            const articles = JSON.parse(newsData).articles;
+            const article = articles[selectedIndex];
+
+            if (!article) {
+                document.body.innerHTML = "<h1 class='text-center text-red-600 mt-10 text-2xl'>Article not found.</h1>";
+                return;
+            }
+
+            displayArticle(article);
+        });
+
+        function displayArticle(article) {
+            const articleContainer = document.getElementById("articleContainer");
+
+            articleContainer.innerHTML = `
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i data-lucide="file-text" class="w-6 h-6 text-blue-600 mr-2"></i> 
+                    ${article.title}
+                </h1>
+                <p class="text-gray-500 text-sm mt-2 flex items-center">
+                    <i data-lucide="user" class="w-5 h-5 mr-1 text-gray-600"></i> 
+                    ${article.author || "Unknown"} 
+                    <span class="mx-2">|</span>
+                    <i data-lucide="clock" class="w-5 h-5 mr-1 text-gray-600"></i> 
+                    ${new Date(article.publishedAt).toLocaleString()}
+                </p>
+
+                <img src="${article.urlToImage || 'https://via.placeholder.com/600'}" 
+                    alt="News Image" class="w-full h-64 object-cover rounded-lg mt-4 shadow-md">
+
+                <p class="text-gray-700 mt-4 leading-relaxed">
+                    ${article.content || "No full content available. Click the button below to read more."}
+                </p>
+
+                <p class="text-gray-600 mt-4 flex items-center">
+                    <i data-lucide="globe" class="w-5 h-5 mr-1 text-blue-600"></i> 
+                    <strong>Source:</strong> ${article.source.name}
+                </p>
+
+                <div class="flex gap-4 mt-6">
+                    <a href="${article.url}" target="_blank" 
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition duration-300 w-1/2">
+                        <i data-lucide="external-link" class="w-5 h-5"></i> Read Full Article
+                    </a>
+                    
+                    <button onclick="summarizeArticle('${article.title}')" 
+                        class="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-green-700 transition duration-300 w-1/2">
+                        <i data-lucide="message-circle" class="w-5 h-5"></i> Summarize
+                    </button>
+                </div>
+            `;
+
+            setTimeout(() => {
+                articleContainer.classList.remove("opacity-0", "scale-95");
+            }, 200);
+
+            lucide.createIcons();
+        }
+
+        function summarizeArticle(title) {
+            const modal = document.getElementById("summaryModal");
+            const summaryText = document.getElementById("summaryText");
+
+            modal.classList.remove("hidden");
+            summaryText.innerText = "Generating summary...";
+
+            fetch("https://api.openai.com/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer OPEN_API_KEY"
+                },
+                body: JSON.stringify({
+                    model: "gpt-4",
+                    messages: [
+                        { role: "system", content: "You are an AI that summarizes news articles." },
+                        { role: "user", content: `Summarize this news article: ${title}` }
+                    ],
+                    max_tokens: 100
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    summaryText.innerText = data.choices[0].message.content || "No summary available.";
+                })
+                .catch(error => {
+                    console.error("Error fetching summary:", error);
+                    summaryText.innerText = "Failed to generate summary. Try again later.";
+                });
+        }
+
+        function readSummary() {
+            const summaryText = document.getElementById("summaryText").innerText;
+
+            fetch("/read_summary", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text: summaryText })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message); // Shows "Reading summary aloud!" message
+                })
+                .catch(error => {
+                    console.error("Error reading summary:", error);
+                    alert("Error in reading summary.");
+                });
+        }
+
+        function closeModal() {
+            document.getElementById("summaryModal").classList.add("hidden");
+        }
+    </script>
+
+</body>
+
+</html>

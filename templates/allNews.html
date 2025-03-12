@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All News</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-2xl font-bold flex items-center">
+                <i data-lucide="newspaper" class="w-6 h-6 mr-2"></i> MultiNews Hub
+            </a>
+            <a href="/news" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300">
+                <i data-lucide="arrow-left" class="w-5 h-5 inline-block"></i> Back
+            </a>
+        </div>
+    </nav>
+
+    <!-- Page Title -->
+    <h1 class="text-4xl font-bold text-center mt-6 text-gray-800">All News</h1>
+    <p class="text-gray-600 text-center mb-6">Explore all news articles from your selected source</p>
+
+    <!-- Filters -->
+    <div class="container mx-auto mb-6 flex flex-wrap justify-center gap-4">
+        <select id="categorySelect" class="p-2 border border-gray-300 rounded-lg shadow-md">
+            <option value="">All Categories</option>
+            <option value="business">Business</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="general">General</option>
+            <option value="health">Health</option>
+            <option value="science">Science</option>
+            <option value="sports">Sports</option>
+            <option value="technology">Technology</option>
+        </select>
+
+        <input type="date" id="fromDate" class="p-2 border border-gray-300 rounded-lg shadow-md">
+        <input type="date" id="toDate" class="p-2 border border-gray-300 rounded-lg shadow-md">
+        
+        <button id="filterBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+            <i data-lucide="filter" class="w-5 h-5 inline-block"></i> Apply Filter
+        </button>
+    </div>
+
+    <!-- News Container -->
+    <div id="newsContainer" class="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-0 transform scale-95 transition-all duration-500">
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const selectedSource = sessionStorage.getItem('selectedNewsSource');
+            const categorySelect = document.getElementById("categorySelect");
+            const fromDateInput = document.getElementById("fromDate");
+            const toDateInput = document.getElementById("toDate");
+            const filterBtn = document.getElementById("filterBtn");
+            const newsContainer = document.getElementById("newsContainer");
+
+            if (!selectedSource) {
+                document.body.innerHTML = "<h1 class='text-center text-red-600 mt-10 text-2xl'>No news source selected.</h1>";
+                return;
+            }
+
+            async function fetchNews(category = "", fromDate = "", toDate = "") {
+                const apiKey = "0ccab9027d284a6980556cf0cdd2855c";
+                let apiUrl = `https://newsapi.org/v2/everything?sources=${selectedSource}&apiKey=${apiKey}`;
+
+                if (category) apiUrl += `&q=${category}`;
+                if (fromDate) apiUrl += `&from=${fromDate}`;
+                if (toDate) apiUrl += `&to=${toDate}`;
+                
+                try {
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+
+                    if (data.status === "ok" && data.articles.length > 0) {
+                        sessionStorage.setItem("allNewsData", JSON.stringify(data));
+                        displayNews(data.articles);
+                    } else {
+                        newsContainer.innerHTML = "<h2 class='text-center text-gray-700 text-xl'>No articles available for the selected filters.</h2>";
+                    }
+                } catch (error) {
+                    console.error("Error fetching news:", error);
+                    newsContainer.innerHTML = "<h2 class='text-center text-red-600 text-xl'>Failed to load news. Try again later.</h2>";
+                }
+            }
+
+            function displayNews(articles) {
+                newsContainer.innerHTML = "";
+
+                articles.forEach((article, index) => {
+                    const newsItem = document.createElement("div");
+                    newsItem.className = "bg-white shadow-lg rounded-lg p-6 mb-4 transition duration-300 hover:shadow-2xl transform hover:-translate-y-1 opacity-0 scale-90";
+
+                    newsItem.innerHTML = `
+                        <img src="${article.urlToImage || 'https://via.placeholder.com/400'}" class="w-full h-48 object-cover rounded-lg mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900 flex items-center">
+                            <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-600"></i> ${article.title}
+                        </h3>
+                        <p class="text-gray-600 mt-2">${article.description || "No description available."}</p>
+                        <p class="text-gray-700 mt-2"><strong>Source:</strong> ${article.source.name}</p>
+                        <p class="text-gray-500 text-sm">
+                            <i data-lucide="user" class="w-4 h-4 inline-block"></i> ${article.author || "Unknown"} | 
+                            <i data-lucide="clock" class="w-4 h-4 inline-block"></i> ${new Date(article.publishedAt).toLocaleString()}
+                        </p>
+                        <button class="read-more block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition duration-300 w-full" data-index="${index}">
+                            <i data-lucide="eye" class="w-5 h-5"></i> Read More
+                        </button>
+                    `;
+
+                    newsContainer.appendChild(newsItem);
+                    setTimeout(() => { newsItem.classList.remove("opacity-0", "scale-90"); }, index * 100);
+                });
+
+                setTimeout(() => { newsContainer.classList.remove("opacity-0", "scale-95"); }, 200);
+                document.querySelectorAll(".read-more").forEach(button => {
+                    button.addEventListener("click", function () {
+                        const articleIndex = this.getAttribute("data-index");
+                        sessionStorage.setItem("selectedArticleIndex", articleIndex);
+                        window.location.href = "/article";
+                    });
+                });
+
+                lucide.createIcons();
+            }
+
+            filterBtn.addEventListener("click", function () {
+                const category = categorySelect.value;
+                const fromDate = fromDateInput.value;
+                const toDate = toDateInput.value;
+
+                if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+                    alert("Invalid date range: 'From' date cannot be after 'To' date.");
+                    return;
+                }
+
+                fetchNews(category, fromDate, toDate);
+            });
+
+            fetchNews();
+        });
+    </script>
+</body>
+
+</html>

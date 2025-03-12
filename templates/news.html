@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News Content</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-gray-100 p-6">
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/dashboard" class="text-2xl font-bold flex items-center">
+                <i data-lucide="newspaper" class="w-6 h-6 mr-2"></i> MultiNews Hub
+            </a>
+            <a href="/dashboard" class="bg-white text-blue-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition duration-300">
+                <i data-lucide="arrow-left" class="w-5 h-5 inline-block"></i> Back
+            </a>
+        </div>
+    </nav>
+
+    <!-- Page Title -->
+    <h1 class="text-4xl font-bold text-center mt-6 text-gray-800">Latest News</h1>
+    <p class="text-gray-600 text-center mb-6">Stay informed with the latest headlines</p>
+
+    <!-- News Container -->
+    <div id="newsContainer" class="container mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-0 transform scale-95 transition-all duration-500">
+        <!-- News articles will be inserted dynamically -->
+    </div>
+
+    <!-- View All News Button -->
+    <div class="text-center mt-6">
+        <button id="viewAllBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg text-lg hover:bg-blue-700 transition duration-300 hidden">
+            View All News
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const selectedSource = sessionStorage.getItem('selectedNewsSource');
+
+            if (!selectedSource) {
+                document.body.innerHTML = "<h1 class='text-center text-red-600 mt-10 text-2xl'>No news source selected.</h1>";
+                return;
+            }
+
+            const apiKey = "0ccab9027d284a6980556cf0cdd2855c"; 
+            const apiUrl = `https://newsapi.org/v2/top-headlines?sources=${selectedSource}&apiKey=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+
+                if (data.status === "ok" && data.articles.length > 0) {
+                    sessionStorage.setItem("newsData", JSON.stringify(data));
+                    displayNews(data.articles.slice(0, 9)); // Show only first 9 articles
+
+                    // Show "View All News" button if there are more than 9 articles
+                    if (data.articles.length > 9) {
+                        document.getElementById("viewAllBtn").classList.remove("hidden");
+                    }
+                } else {
+                    document.getElementById("newsContainer").innerHTML = "<h2 class='text-center text-gray-700 text-xl'>No articles available for this source.</h2>";
+                }
+            } catch (error) {
+                console.error("Error fetching news:", error);
+                document.getElementById("newsContainer").innerHTML = "<h2 class='text-center text-red-600 text-xl'>Failed to load news. Try again later.</h2>";
+            }
+        });
+
+        function displayNews(articles) {
+            const newsContainer = document.getElementById("newsContainer");
+            newsContainer.innerHTML = ""; // Clear previous content
+
+            articles.forEach((article, index) => {
+                const uniqueId = `news-${index}`;
+
+                const newsItem = document.createElement("div");
+                newsItem.className = "bg-white shadow-lg rounded-lg p-6 mb-4 transition duration-300 hover:shadow-2xl transform hover:-translate-y-1 opacity-0 scale-90";
+
+                newsItem.innerHTML = `
+                    <img src="${article.urlToImage || 'https://via.placeholder.com/400'}" 
+                        alt="News Image" class="w-full h-48 object-cover rounded-lg mb-4">
+                    
+                    <h3 class="text-xl font-semibold text-gray-900 flex items-center">
+                        <i data-lucide="file-text" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        ${article.title}
+                    </h3>
+                    
+                    <p class="text-gray-600 mt-2">${article.description || "No description available."}</p>
+                    
+                    <p class="text-gray-700 mt-2"><strong>Source:</strong> ${article.source.name}</p>
+                    
+                    <p class="text-gray-500 text-sm">
+                        <i data-lucide="user" class="w-4 h-4 inline-block"></i> 
+                        ${article.author || "Unknown"} | 
+                        <i data-lucide="clock" class="w-4 h-4 inline-block"></i> 
+                        ${new Date(article.publishedAt).toLocaleString()}
+                    </p>
+
+                    <button id="${uniqueId}" data-index="${index}" 
+                        class="read-more block mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition duration-300 w-full">
+                        <i data-lucide="eye" class="w-5 h-5"></i> Read More
+                    </button>
+                `;
+
+                newsContainer.appendChild(newsItem);
+
+                // Fade-in animation
+                setTimeout(() => {
+                    newsItem.classList.remove("opacity-0", "scale-90");
+                }, index * 100);
+            });
+
+            // Reveal container smoothly
+            setTimeout(() => {
+                newsContainer.classList.remove("opacity-0", "scale-95");
+            }, 200);
+
+            // Add event listeners to Read More buttons
+            document.querySelectorAll(".read-more").forEach(button => {
+                button.addEventListener("click", function () {
+                    const articleIndex = this.getAttribute("data-index");
+                    sessionStorage.setItem("selectedArticleIndex", articleIndex);
+                    window.location.href = "/article"; // Redirect to article page
+                });
+            });
+
+            // Load icons
+            lucide.createIcons();
+        }
+
+        // "View All News" button click event
+        document.getElementById("viewAllBtn").addEventListener("click", function () {
+            window.location.href = "/all-news"; // Redirect to a new page to show all articles
+        });
+    </script>
+
+</body>
+
+</html>
